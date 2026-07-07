@@ -5,6 +5,7 @@ import FieldRouter from "./src/routes/field.route.js";
 import BookingRouter from "./src/routes/booking.route.js";
 import connectMongo from "./src/config/mongo.js";
 import cors from "cors";
+import path from "path";
 
 dotenv.config();
 connectMongo();
