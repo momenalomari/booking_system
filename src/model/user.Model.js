@@ -19,11 +19,21 @@ const userSchema = new mongoose.Schema(
       required: true,
       minlength: 6,
     },
+    phone: {
+      type: String,
+      required: true,
+      match: /^\d{10}$/,
+    },
     role: {
       type: String,
-      enum: ["user", "admin"],
+      enum: ["user", "admin","fieldManager"],
       default: "user",
     },
+    approvalStatus:{
+      type : String,
+      enum : ["pending","approved","rejected"],
+      default : "approved"
+    }
   },
   { timestamps: true }
 );

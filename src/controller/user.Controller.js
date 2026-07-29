@@ -6,10 +6,9 @@ import jwt from "jsonwebtoken";
 // create user
 const createUser = async (req, res) => {
   try {
-    const { name, email, password, confirm_password } = req.body;
-  
+    const { name, email, phone, password, confirm_password } = req.body;
 
-    if (!name || !email || !password || !confirm_password) {
+    if (!name || !email || !phone || !password || !confirm_password) {
       return res.status(400).json({ message: "All fields are required" });
     }
     const isExist = await User.findOne({ email });
@@ -29,18 +28,27 @@ const createUser = async (req, res) => {
           "Password must be at least 8 characters long and include uppercase letters, lowercase letters, numbers, and special characters",
       });
     }
-
+    let finalApprovalStatus = "approved";
+    if (req.body.role === "fieldManager") {
+      finalApprovalStatus = "pending";
+    }
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(email)) {
       return res.status(400).json({ message: "Invalid email format" });
+    }
+    const phonePattern = /^\d{10}$/;
+    if (!phonePattern.test(phone)) {
+      return res.status(400).json({ message: "Invalid phone number format" });
     }
 
     const hashed_Password = await bcrypt.hash(password, 10);
     const user = await User.create({
       name,
       email,
+      phone,
       hashed_Password,
-      role: "user",
+      role: req.body.role || "user",
+      approvalStatus: finalApprovalStatus,
     });
     res.status(201).json({ user, message: "User created successfully" });
   } catch (error) {
@@ -109,7 +117,7 @@ const updateUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     const isExist = await User.findOne({ email: req.body.email });
-    if (!isExist) {
+    if (isExist && isExist._id.toString() !== req.params.id) {
       return res.status(400).json({ message: "Email already exists" });
     }
 
@@ -165,6 +173,27 @@ const updateUserPassword = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+// UPDATE ROLE BY ADMIN
+const updateUserRoleByAdmin = async (req, res) => {
+  const userId = req.params.id;
+  const newRole = req.body.role;
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const newUser = await User.findByIdAndUpdate(
+      userId,
+      { role: newRole },
+      { new: true },
+    );
+    res
+      .status(200)
+      .json({ message: "User role updated successfully", user: newUser });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 // delete user by id
 
@@ -188,5 +217,6 @@ export {
   updateUser,
   deleteUser,
   updateUserPassword,
+  updateUserRoleByAdmin
 };
 export { loginUser };
