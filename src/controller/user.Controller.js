@@ -40,6 +40,7 @@ const createUser = async (req, res) => {
     if (!phonePattern.test(phone)) {
       return res.status(400).json({ message: "Invalid phone number format" });
     }
+   
 
     const hashed_Password = await bcrypt.hash(password, 10);
     const user = await User.create({
@@ -67,6 +68,12 @@ const loginUser = async (req, res) => {
         .json({ message: "Email and password are required" });
     }
 
+     if (req.body.role == "fieldManager" && req.body.approvalStatus == "pending"){
+      return res.status(403).json({ message: "Your account is pending approval" });
+     } 
+     if (req.body.role == "fieldManager" && req.body.approvalStatus == "rejected"){
+      return res.status(403).json({ message: "Your account has been rejected" });
+     }
     const isExist = await User.findOne({ email });
 
     if (!isExist) {

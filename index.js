@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import UserRouter from "./src/routes/user.Route.js";
 import FieldRouter from "./src/routes/field.route.js";
 import BookingRouter from "./src/routes/booking.route.js";
+import AdminRouter from "./src/routes/admin.route.js";
 import connectMongo from "./src/config/mongo.js";
 import cors from "cors";
 import path from "path";
@@ -22,6 +23,7 @@ app.use(
 app.use("/api/users", UserRouter);
 app.use("/api/fields", FieldRouter);
 app.use("/api/bookings", BookingRouter);
+app.use("/api/admin", AdminRouter);
 
 app.listen(process.env.PORT, () => {
   console.log(`Server is running on port ${process.env.PORT}`);
